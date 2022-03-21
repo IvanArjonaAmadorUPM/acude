@@ -43,8 +43,7 @@ public class LocationActivity extends AppCompatActivity {
                 .setFastestInterval(FAST_UPDATE_INTERVAL)
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-        updateGPS();
-        Toast.makeText(this,"updategps",Toast.LENGTH_SHORT).show();
+        //updateGPS()
 
     }
 
@@ -67,7 +66,6 @@ public class LocationActivity extends AppCompatActivity {
 
     public void updateGPS(){
         //get permision from user to track GPS
-
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(LocationActivity.this);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             //the user have provided the permission
