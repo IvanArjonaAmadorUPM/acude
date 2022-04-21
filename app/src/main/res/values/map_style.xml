@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="map_style_json">
+        [
+          {
+            \"featureType\": \"administrative.neighborhood\",
+            \"elementType\": \"labels\",
+            \"stylers\": [
+              {
+                \"saturation\": 35
+              },
+              {
+                \"weight\": 1.5
+              }
+            ]
+          },
+          {
+            \"featureType\": \"landscape.man_made\",
+            \"stylers\": [
+              {
+                \"saturation\": 40
+              },
+              {
+                \"lightness\": 30
+              },
+              {
+                \"weight\": 1
+              }
+            ]
+          },
+          {
+            \"featureType\": \"poi.attraction\",
+            \"stylers\": [
+              {
+                \"visibility\": \"off\"
+              }
+            ]
+          },
+          {
+            \"featureType\": \"poi.business\",
+            \"stylers\": [
+              {
+                \"visibility\": \"off\"
+              }
+            ]
+          },
+          {
+            \"featureType\": \"poi.government\",
+            \"stylers\": [
+              {
+                \"visibility\": \"off\"
+              }
+            ]
+          },
+          {
+            \"featureType\": \"poi.government\",
+            \"elementType\": \"geometry.fill\",
+            \"stylers\": [
+              {
+                \"color\": \"#001dfa\"
+              },
+              {
+                \"visibility\": \"off\"
+              }
+            ]
+          },
+          {
+            \"featureType\": \"poi.medical\",
+            \"elementType\": \"geometry.fill\",
+            \"stylers\": [
+              {
+                \"color\": \"#fb657d\"
+              },
+              {
+                \"saturation\": 15
+              },
+              {
+                \"lightness\": 10
+              },
+              {
+                \"weight\": 6.5
+              }
+            ]
+          },
+          {
+            \"featureType\": \"poi.park\",
+            \"elementType\": \"geometry.fill\",
+            \"stylers\": [
+              {
+                \"color\": \"#7cd76a\"
+              }
+            ]
+          },
+          {
+            \"featureType\": \"poi.park\",
+            \"elementType\": \"labels.icon\",
+            \"stylers\": [
+              {
+                \"visibility\": \"off\"
+              }
+            ]
+          },
+          {
+            \"featureType\": \"poi.park\",
+            \"elementType\": \"labels.text\",
+            \"stylers\": [
+              {
+                \"visibility\": \"off\"
+              }
+            ]
+          },
+          {
+            \"featureType\": \"poi.place_of_worship\",
+            \"stylers\": [
+              {
+                \"visibility\": \"off\"
+              }
+            ]
+          },
+          {
+            \"featureType\": \"poi.school\",
+            \"stylers\": [
+              {
+                \"visibility\": \"off\"
+              }
+            ]
+          },
+          {
+            \"featureType\": \"poi.sports_complex\",
+            \"elementType\": \"geometry.fill\",
+            \"stylers\": [
+              {
+                \"color\": \"#0d7822\"
+              }
+            ]
+          },
+          {
+            \"featureType\": \"road.arterial\",
+            \"elementType\": \"geometry.fill\",
+            \"stylers\": [
+              {
+                \"color\": \"#bac3f2\"
+              },
+              {
+                \"saturation\": 100
+              },
+              {
+                \"lightness\": 25
+              },
+              {
+                \"weight\": 4
+              }
+            ]
+          },
+          {
+            \"featureType\": \"road.highway\",
+            \"elementType\": \"geometry.fill\",
+            \"stylers\": [
+              {
+                \"color\": \"#ddea2a\"
+              }
+            ]
+          },
+          {
+            \"featureType\": \"road.highway\",
+            \"elementType\": \"geometry.stroke\",
+            \"stylers\": [
+              {
+                \"visibility\": \"off\"
+              }
+            ]
+          },
+          {
+            \"featureType\": \"road.highway\",
+            \"elementType\": \"labels.icon\",
+            \"stylers\": [
+              {
+                \"saturation\": 55
+              },
+              {
+                \"lightness\": 10
+              },
+              {
+                \"weight\": 6.5
+              }
+            ]
+          },
+          {
+            \"featureType\": \"road.highway\",
+            \"elementType\": \"labels.text\",
+            \"stylers\": [
+              {
+                \"saturation\": 20
+              },
+              {
+                \"lightness\": -15
+              },
+              {
+                \"weight\": 5.5
+              }
+            ]
+          },
+          {
+            \"featureType\": \"road.local\",
+            \"stylers\": [
+              {
+                \"weight\": 2
+              }
+            ]
+          },
+          {
+            \"featureType\": \"road.local\",
+            \"elementType\": \"geometry.stroke\",
+            \"stylers\": [
+              {
+                \"visibility\": \"on\"
+              },
+              {
+                \"weight\": 1
+              }
+            ]
+          },
+          {
+            \"featureType\": \"transit.line\",
+            \"stylers\": [
+              {
+                \"visibility\": \"off\"
+              }
+            ]
+          },
+          {
+            \"featureType\": \"transit.station.bus\",
+            \"stylers\": [
+              {
+                \"visibility\": \"off\"
+              }
+            ]
+          },
+          {
+            \"featureType\": \"transit.station.rail\",
+            \"elementType\": \"labels.icon\",
+            \"stylers\": [
+              {
+                \"visibility\": \"off\"
+              }
+            ]
+          }
+        ]
+    </string>
+
+</resources>

@@ -7,6 +7,7 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -14,6 +15,8 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import androidx.appcompat.widget.SearchView;
+
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -24,6 +27,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.acude.databinding.ActivityMapsBinding;
 
@@ -35,6 +39,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private SearchView searchView;
 
+    private static final String TAG = MapsActivity.class.getSimpleName();
 
     private ActivityMapsBinding binding;
 
@@ -63,6 +68,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         /*get permissions*/
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PackageManager.PERMISSION_GRANTED);
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PackageManager.PERMISSION_GRANTED);
+
     }
 
 
@@ -81,6 +87,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        setMapStyle(mMap);
         //Add a marker in Sydney and move the camera
         //LatLng sydney = new LatLng(-34, 151);
         //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
@@ -146,5 +153,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             e.printStackTrace();
         }
 
+    }
+    public void setMapStyle( GoogleMap mMap){
+        boolean success = mMap.setMapStyle(new MapStyleOptions(getResources()
+                .getString(R.string.map_style_json)));
+
+        if (!success) {
+            Log.e(TAG, "Style parsing failed.");
+        }
     }
 }
