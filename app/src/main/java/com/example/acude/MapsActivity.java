@@ -72,8 +72,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-
-
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -86,7 +84,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
         setMapStyle(mMap);
         //Add a marker in Sydney and move the camera
         //LatLng sydney = new LatLng(-34, 151);
@@ -100,6 +97,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                mMap.setTrafficEnabled(true);
                 String destinationIntroduced = searchView.getQuery().toString();
                 List<Address> addressList = null;
                 if (destinationIntroduced != null || destinationIntroduced.equals("")) {
@@ -112,7 +110,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     Address destinationAddress = addressList.get(0);
                     destinationCoords = new LatLng(destinationAddress.getLatitude(), destinationAddress.getLongitude());
                     mMap.addMarker(new MarkerOptions().position(destinationCoords).title(destinationIntroduced));
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(destinationCoords, 10));
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(destinationCoords, 16));
                 }
                 return false;
             }
@@ -126,9 +124,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(@NonNull Location location) {
-                actualPosition = new LatLng(location.getLatitude(),location.getLongitude());
+                actualPosition = new LatLng(location.getLatitude(), location.getLongitude());
                 mMap.addMarker(new MarkerOptions().position(actualPosition).title("my position"));
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(actualPosition,8));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(actualPosition, 8));
             }
 
             @Override
@@ -154,7 +152,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
     }
-    public void setMapStyle( GoogleMap mMap){
+    public void setMapStyle(GoogleMap mMap) {
         boolean success = mMap.setMapStyle(new MapStyleOptions(getResources()
                 .getString(R.string.map_style_json)));
 
