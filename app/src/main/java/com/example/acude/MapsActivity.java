@@ -18,7 +18,7 @@ import androidx.appcompat.widget.SearchView;
 
 import android.util.Log;
 import android.widget.Toast;
-
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMapOptions;
@@ -30,8 +30,16 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.acude.databinding.ActivityMapsBinding;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.RectangularBounds;
+import com.google.android.libraries.places.api.model.TypeFilter;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -52,23 +60,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public static final int MIN_TIME = 1000; //1 SECOND
     public static final int MIN_DISTANCE = 5; //5 METERS
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        /*get permissions*/
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PackageManager.PERMISSION_GRANTED);
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PackageManager.PERMISSION_GRANTED);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
 
         mapFragment.getMapAsync(this);
-        /*get permissions*/
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PackageManager.PERMISSION_GRANTED);
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PackageManager.PERMISSION_GRANTED);
-
     }
 
 
@@ -85,48 +91,42 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         setMapStyle(mMap);
-        //Add a marker in Sydney and move the camera
-        //LatLng sydney = new LatLng(-34, 151);
-        //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        if (!Places.isInitialized()) {
+            Places.initialize(getApplicationContext(), "AIzaSyCl0SpP6o0pKVJITvTYdhVNSL8o01yDEgk");
+        }
+        AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
+                getSupportFragmentManager().findFragmentById(R.id.autocomplete_search_fragment);
 
-        //LatLng firefighterAlcala = new LatLng(40.48855, -3.384250);
-        //mMap.addMarker(new MarkerOptions().position(firefighterAlcala).title("firefighterAlcala in Alcala"));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(firefighterAlcala));
+        assert autocompleteFragment != null;
+        autocompleteFragment.setTypeFilter(TypeFilter.ADDRESS);
 
-        searchView = findViewById(R.id.idSearchView);
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        autocompleteFragment.setLocationBias(RectangularBounds.newInstance(
+                new LatLng(40.217127,-3.131993),
+                new LatLng(40.657572,-4.120929)));
+        autocompleteFragment.setCountries("ES");
+
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.NAME,Place.Field.LAT_LNG));
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
-            public boolean onQueryTextSubmit(String query) {
+            public void onPlaceSelected(@NonNull Place place) {
+                System.out.println("------------------- Place: " + place.getName() + "," + place.getLatLng());
                 mMap.setTrafficEnabled(true);
-                String destinationIntroduced = searchView.getQuery().toString();
-                List<Address> addressList = null;
-                if (destinationIntroduced != null || destinationIntroduced.equals("")) {
-                    Geocoder geocoder = new Geocoder(MapsActivity.this);
-                    try {
-                        addressList = geocoder.getFromLocationName(destinationIntroduced, 1);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    Address destinationAddress = addressList.get(0);
-                    destinationCoords = new LatLng(destinationAddress.getLatitude(), destinationAddress.getLongitude());
-                    mMap.addMarker(new MarkerOptions().position(destinationCoords).title(destinationIntroduced));
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(destinationCoords, 16));
-                }
-                return false;
+                String destinationAddress = place.getName();
+                destinationCoords = place.getLatLng();
+                mMap.addMarker(new MarkerOptions().position(destinationCoords).title(destinationAddress));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(destinationCoords, 16));
             }
-
             @Override
-            public boolean onQueryTextChange(String newText) {
-                return false;
+            public void onError(@NonNull Status status) {
+                Log.i(TAG, "An error occurred: " + status);
             }
         });
-
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(@NonNull Location location) {
                 actualPosition = new LatLng(location.getLatitude(), location.getLongitude());
                 mMap.addMarker(new MarkerOptions().position(actualPosition).title("my position"));
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(actualPosition, 8));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(actualPosition, 12));
             }
 
             @Override
@@ -160,4 +160,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.e(TAG, "Style parsing failed.");
         }
     }
+
+  /*  public void getRoute(LatLng origin, LatLng destination) {
+        try {
+            String url = "https://maps.googleapis.com/maps/api/directions/json?" +
+                    "origin=" + origin.latitude + "," + origin.longitude +
+                    "&" +
+                    "destination="+ destination.latitude + "," + destination.longitude +
+                    "&key=" + "AIzaSyA36f2OoQHWJbcK0QmrQUSUBcAf2F93Lt0";
+
+           System.out.println("---------------------- " + url);
+          //  OkHttpClient client = new OkHttpClient().newBuilder()
+                  //  .build();
+          //  Request request = new Request.Builder().url(url)
+                    //.url("https://maps.googleapis.com/maps/api/directions/json?origin=Toronto&destination=Montreal&key=YOUR_API_KEY")
+                 //   .method("GET", null)
+                 //   .build();
+           // Response response = client.newCall(request).execute();
+          //  System.out.println("response" + response);
+        } catch (IOException e) {
+            String response = e.toString();
+        }
+    }*/
 }
