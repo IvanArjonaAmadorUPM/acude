@@ -5,7 +5,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AuthActivity">
+    tools:context=".AuthActivity"
+    android:background="@color/red">
 
     <LinearLayout
         android:layout_width="0dp"
@@ -19,14 +20,38 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <ImageView
+            android:id="@+id/imageView4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ambulance_image_icon" />
+
+        <TextView
+            android:id="@+id/acudeText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-black"
+            android:text="ACUDE"
+            android:textAlignment="center"
+            android:textSize="80sp"
+            android:textColor="@color/veryLigthRed"/>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="20dp" />
+
         <EditText
             android:id="@+id/emailEditId"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
             android:hint="Email"
+            android:drawableStart="@drawable/custom_email_icon"
+            android:drawablePadding="12dp"
+            android:paddingStart="12dp"
             android:inputType="textEmailAddress"
-            android:minHeight="48dp" />
+            android:minHeight="48dp"
+            android:background="@drawable/custom_input"/>
 
         <Space
             android:layout_width="match_parent"
@@ -37,9 +62,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
+            android:drawableStart="@drawable/custom_lock_icon"
+            android:drawablePadding="12dp"
+            android:paddingStart="12dp"
             android:hint="Contraseña"
             android:inputType="textPassword"
-            android:minHeight="48dp" />
+            android:minHeight="48dp"
+            android:background="@drawable/custom_input" />
 
         <Space
             android:layout_width="match_parent"

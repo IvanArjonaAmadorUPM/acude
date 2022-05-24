@@ -23,7 +23,6 @@ public class AuthActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auth);
-
         //setup
         FirebaseApp.initializeApp(this);
         setup();

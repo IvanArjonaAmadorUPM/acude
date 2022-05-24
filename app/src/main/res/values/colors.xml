@@ -9,6 +9,9 @@
     <color name="white">#FFFFFFFF</color>
     <color name="orange">#CC4425</color>
     <color name="red">#F64A3E</color>
-    <color name="lightRed">#F8776E</color>
-    <color name="importantRed">#F5948D</color>
+    <color name="lightRed">#E26C64</color>
+    <color name="importantRed">#B02319</color>
+    <color name="veryLigthRed">#FF8880</color>
+
+
 </resources>
