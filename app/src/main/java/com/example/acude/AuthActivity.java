@@ -29,15 +29,20 @@ public class AuthActivity extends AppCompatActivity {
     }
 
     private void setup() {
-        String title = "Autenticación";
-
         Button loginButton = (Button)findViewById(R.id.loginButon);
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 EditText email = (EditText) findViewById(R.id.emailEditId);
                 EditText password = (EditText) findViewById(R.id.passwordEditid);
-                if(email.getText() != null && password.getText() !=null ) {
+                boolean isDataValid = !email.getText().toString().equals("") && !password.getText().toString().equals("");
+                if(!isDataValid){
+                    AlertDialog.Builder builder = new AlertDialog.Builder(AuthActivity.this);
+                    builder.setMessage("Completa todos los campos para acceder a la aplicación");
+                    builder.setTitle("Datos incompletos");
+                    AlertDialog alertDialog = builder.create();
+                    alertDialog.show();
+                } else{
                     FirebaseAuth.getInstance().signInWithEmailAndPassword(
                             email.getText().toString(), password.getText().toString())
                             .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
@@ -66,7 +71,14 @@ public class AuthActivity extends AppCompatActivity {
             public void onClick(View view) {
                 EditText email = (EditText) findViewById(R.id.emailEditId);
                 EditText password = (EditText) findViewById(R.id.passwordEditid);
-                if(email.getText() != null && password.getText() !=null ) {
+                boolean isDataValid = !email.getText().toString().equals("") && !password.getText().toString().equals("");
+                if(!isDataValid) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(AuthActivity.this);
+                    builder.setMessage("Completa todos los campos poder registrarte en la aplicación");
+                    builder.setTitle("Datos incompletos");
+                    AlertDialog alertDialog = builder.create();
+                    alertDialog.show();
+                }else{
                     FirebaseAuth.getInstance().createUserWithEmailAndPassword(
                             email.getText().toString(), password.getText().toString())
                             .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
@@ -79,7 +91,7 @@ public class AuthActivity extends AppCompatActivity {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             AlertDialog.Builder builder = new AlertDialog.Builder(AuthActivity.this);
-                            builder.setMessage("Ha ocurrido un error durante el registro, vuelve a intentarlo");
+                            builder.setMessage("Uno de los campos no es válidos, inténtalo de nuevo");
                             builder.setTitle("Error");
                             AlertDialog alertDialog = builder.create();
                             alertDialog.show();

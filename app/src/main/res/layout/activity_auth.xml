@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".AuthActivity"
-    android:background="@color/red">
+    android:background="@color/white">
 
     <LinearLayout
         android:layout_width="0dp"
@@ -25,6 +25,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:srcCompat="@drawable/ambulance_image_icon" />
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
 
         <TextView
             android:id="@+id/acudeText"
@@ -34,11 +37,11 @@
             android:text="ACUDE"
             android:textAlignment="center"
             android:textSize="80sp"
-            android:textColor="@color/veryLigthRed"/>
+            android:textColor="@color/red"/>
 
         <Space
             android:layout_width="match_parent"
-            android:layout_height="20dp" />
+            android:layout_height="35dp" />
 
         <EditText
             android:id="@+id/emailEditId"
@@ -84,7 +87,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:backgroundTint="@color/importantRed"
+                android:backgroundTint="@color/green"
                 android:text="Registrar"
                 android:textColor="@color/white" />
 

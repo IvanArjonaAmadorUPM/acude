@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "767713845805",
+    "project_id": "acude-9a40a",
+    "storage_bucket": "acude-9a40a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:767713845805:android:66ca597154283bcd00cea4",
+        "android_client_info": {
+          "package_name": "com.example.acude"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "767713845805-bpi8lv14m1g1jmd64iborq4r2bprmkeg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBgUDOg-YmWs1vIoCdlSzc2W5czKiyQJVw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "767713845805-bpi8lv14m1g1jmd64iborq4r2bprmkeg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
