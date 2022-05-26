@@ -20,6 +20,9 @@ import android.os.Bundle;
 import androidx.appcompat.widget.SearchView;
 
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -55,6 +58,7 @@ import com.google.android.libraries.places.widget.listener.PlaceSelectionListene
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -74,6 +78,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationManager locationManager;
     private LatLng actualPosition;
     private LatLng destinationCoords;
+    private String routeTime;
 
 
     public static final int MIN_TIME = 1000; //1 SECOND
@@ -92,7 +97,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
-
         mapFragment.getMapAsync(this);
     }
 
@@ -110,8 +114,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         setMapStyle(mMap);
+
+        Button trafficButton = findViewById(R.id.trafficButton);
+        trafficButton.setBackgroundColor(getResources().getColor(R.color.red));
+        trafficButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mMap.setTrafficEnabled(!mMap.isTrafficEnabled());
+                if(mMap.isTrafficEnabled()){
+                    trafficButton.setBackgroundColor(getResources().getColor(R.color.green));
+                }else {
+                    trafficButton.setBackgroundColor(getResources().getColor(R.color.red));
+                }
+
+
+            }
+        });
+
         if (!Places.isInitialized()) {
-            Places.initialize(getApplicationContext(), "AIzaSyCl0SpP6o0pKVJITvTYdhVNSL8o01yDEgk");
+            Places.initialize(getApplicationContext(), "AIzaSyDQzqtfnABh1HPxjOM0T_LbB9LJzztH7J0");
         }
         AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
                 getSupportFragmentManager().findFragmentById(R.id.autocomplete_search_fragment);
@@ -128,11 +149,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(@NonNull Place place) {
-                mMap.setTrafficEnabled(true);
                 String destinationAddress = place.getName();
                 destinationCoords = place.getLatLng();
                 mMap.addMarker(new MarkerOptions().position(destinationCoords).title(destinationAddress));
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(destinationCoords, 16));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(destinationCoords, 14));
                 setRoute(actualPosition, destinationCoords, mMap);
             }
             @Override
@@ -181,26 +201,38 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void setRoute(LatLng actualPosition, LatLng destinationCoords, GoogleMap mMap) {
+
+        Float actualLat = (float) actualPosition.latitude;
+        Float actualLng = (float) actualPosition.longitude;
+        String actualString = actualLat.toString() + "," + actualLng.toString();
+
+        Float destinationLat = (float) destinationCoords.latitude;
+        Float destinationLng = (float) destinationCoords.longitude;
+        String destinationString = destinationLat.toString() + "," + destinationLng.toString();
+
         RequestQueue requestQueue = Volley.newRequestQueue(this);
         String url = Uri.parse("https://maps.googleapis.com/maps/api/directions/json")
                 .buildUpon()
-                .appendQueryParameter("destination", "40.488571,-3.384761")
-                .appendQueryParameter("origin", "40.486847,-3.375545")
+                .appendQueryParameter("destination", destinationString)
+                .appendQueryParameter("origin", actualString)
                 .appendQueryParameter("mode", "driving")
-                .appendQueryParameter("key", "AIzaSyCl0SpP6o0pKVJITvTYdhVNSL8o01yDEgk")
-                .appendQueryParameter("traffic_model","optimistic") //best_guess
+                .appendQueryParameter("key", "AIzaSyDQzqtfnABh1HPxjOM0T_LbB9LJzztH7J0")
+                .appendQueryParameter("traffic_model","best_guess") //best_guess
                 .appendQueryParameter("departure_time","now")
                 .toString();
-        System.out.println("---------" + url);
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 try {
                     String status = response.getString("status");
+
                     if (status.equals("OK")) {
+
                         JSONArray routes = response.getJSONArray("routes");
                         ArrayList<LatLng> points;
                         PolylineOptions polylineOptions = null;
+
+                        getTime(routes);
 
                         for (int i=0;i<routes.length();i++){
                             points = new ArrayList<>();
@@ -211,8 +243,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 JSONArray steps = legs.getJSONObject(j).getJSONArray("steps");
 
                                 for (int k=0;k<steps.length();k++){
-                                    String polyline = steps.getJSONObject(k).getJSONObject("polyline").getString("points");
-                                    List<LatLng> list = decodePoly(polyline);
+                                    String polyline = steps.getJSONObject(k).getJSONObject("polyline").getString("points");List<LatLng> list = decodePoly(polyline);
 
                                     for (int l=0;l<list.size();l++){
                                         LatLng position = new LatLng((list.get(l)).latitude, (list.get(l)).longitude);
@@ -222,7 +253,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             }
                             polylineOptions.addAll(points);
                             polylineOptions.width(40);
-                            polylineOptions.color(ContextCompat.getColor(MapsActivity.this, R.color.orange));
+                            polylineOptions.color(ContextCompat.getColor(MapsActivity.this, R.color.lightRed));
                             polylineOptions.geodesic(true);
                         }
                         mMap.addPolyline(polylineOptions);
@@ -243,8 +274,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         jsonObjectRequest.setRetryPolicy(retryPolicy);
         requestQueue.add(jsonObjectRequest);
     }
+
+    private void getTime(JSONArray routes) throws JSONException {
+        for (int i=0;i<routes.length();i++) {
+            JSONArray legs = routes.getJSONObject(i).getJSONArray("legs");
+            for(int j=0;j<legs.length();j++){
+                String time = legs.getJSONObject(j).getJSONObject("duration").getString("text");
+                routeTime = time.substring(0,2);
+                TextView totalRouteTime = findViewById(R.id.totalTimeRoute);
+                totalRouteTime.setText(routeTime + "minutos");
+            }
+        }
+
+    }
+
     private List<LatLng> decodePoly(String encoded){
-        List<LatLng> poly = new ArrayList<>();
+
+        List<LatLng> poly = new ArrayList<LatLng>();
+
         int index = 0, len = encoded.length();
         int lat = 0, lng = 0;
 
@@ -264,14 +311,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 b = encoded.charAt(index++) - 63;
                 result |= (b & 0x1f) << shift;
                 shift += 5;
-            } while (b > 0x20);
+            } while (b >= 0x20);
             int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
             lng += dlng;
 
-            LatLng p = new LatLng((((double) lat / 1E5)),
-                    (((double) lng / 1E5)));
+            LatLng p = new LatLng((double) lat / 1E5, (double) lng / 1E5);
             poly.add(p);
         }
+
         return poly;
+
+        }
     }
-}
