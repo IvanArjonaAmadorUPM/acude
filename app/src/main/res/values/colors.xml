@@ -13,4 +13,12 @@
     <color name="importantRed">#8e0000</color>
     <color name="veryLigthRed">#FF8880</color>
     <color name="green">#007A23</color>
+    <color name="intenseStrongRed">#8A0000</color>
+    <color name="intenseRed">#d50000</color>
+    <color name="intenseOrange">#D66800</color>
+    <color name="intenseStrongGreen">#008A27</color>
+    <color name="intenseLightGreen">#00D63D</color>
+
+
+
 </resources>

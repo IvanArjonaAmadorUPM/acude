@@ -55,12 +55,44 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1" />
 
-            <TextView
-                android:id="@+id/totalTimeRoute"
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/totalTimeRoute"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_weight="1"
+                    android:textSize="34sp" />
+
+                <TextView
+                    android:id="@+id/trafficImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:drawableStart="@drawable/ic_traffic_alert"
+                    android:paddingStart="4dp"
+                    android:textAlignment="center" />
+
+                <TextView
+                    android:id="@+id/trafficText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="¡tráfico!"
+                    android:textColor="#8A0000"
+                    android:textSize="11sp"
+                    android:visibility="invisible" />
+
+            </LinearLayout>
+
+            <Space
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                />
+                android:layout_weight="1" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/button2"
@@ -75,6 +107,7 @@
                 app:iconGravity="textStart"
                 app:iconPadding="0dp"
                 />
+
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>

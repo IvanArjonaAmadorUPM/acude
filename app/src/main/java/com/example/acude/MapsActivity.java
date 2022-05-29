@@ -22,6 +22,8 @@ import androidx.appcompat.widget.SearchView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,6 +48,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.acude.databinding.ActivityMapsBinding;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
@@ -78,9 +81,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationManager locationManager;
     private LatLng actualPosition;
     private LatLng destinationCoords;
-    private String routeTime;
-
-
+    private int routeTime;
+    private ArrayList<Polyline> lines = new ArrayList<>();
+    private JSONArray routes;
     public static final int MIN_TIME = 1000; //1 SECOND
     public static final int MIN_DISTANCE = 5; //5 METERS
 
@@ -114,7 +117,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         setMapStyle(mMap);
-
         Button trafficButton = findViewById(R.id.trafficButton);
         trafficButton.setBackgroundColor(getResources().getColor(R.color.red));
         trafficButton.setOnClickListener(new View.OnClickListener() {
@@ -201,6 +203,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void setRoute(LatLng actualPosition, LatLng destinationCoords, GoogleMap mMap) {
+        if(lines.size()>0) {
+            for(Polyline line: lines ){
+                line.remove();
+            }
+        }
 
         Float actualLat = (float) actualPosition.latitude;
         Float actualLng = (float) actualPosition.longitude;
@@ -217,8 +224,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .appendQueryParameter("origin", actualString)
                 .appendQueryParameter("mode", "driving")
                 .appendQueryParameter("key", "AIzaSyDQzqtfnABh1HPxjOM0T_LbB9LJzztH7J0")
-                .appendQueryParameter("traffic_model","best_guess") //best_guess
+                .appendQueryParameter("traffic_model","best_guess") //best_guess pessimistic
                 .appendQueryParameter("departure_time","now")
+                .appendQueryParameter("alternatives","true")
                 .toString();
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
@@ -228,37 +236,64 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     if (status.equals("OK")) {
 
-                        JSONArray routes = response.getJSONArray("routes");
+                        routes = response.getJSONArray("routes");
                         ArrayList<LatLng> points;
                         PolylineOptions polylineOptions = null;
 
-                        getTime(routes);
-
+                        getTime(0);
+                        int counter=0;
                         for (int i=0;i<routes.length();i++){
                             points = new ArrayList<>();
                             polylineOptions = new PolylineOptions();
                             JSONArray legs = routes.getJSONObject(i).getJSONArray("legs");
-
-                            for (int j=0;j<legs.length();j++){
+                            for (int j=0;j<legs.length();j++) {
                                 JSONArray steps = legs.getJSONObject(j).getJSONArray("steps");
+                                for (int k = 0; k < steps.length(); k++) {
+                                    String polyline = steps.getJSONObject(k).getJSONObject("polyline").getString("points");
+                                    List<LatLng> list = decodePoly(polyline);
 
-                                for (int k=0;k<steps.length();k++){
-                                    String polyline = steps.getJSONObject(k).getJSONObject("polyline").getString("points");List<LatLng> list = decodePoly(polyline);
-
-                                    for (int l=0;l<list.size();l++){
+                                    for (int l = 0; l < list.size(); l++) {
                                         LatLng position = new LatLng((list.get(l)).latitude, (list.get(l)).longitude);
                                         points.add(position);
                                     }
                                 }
                             }
                             polylineOptions.addAll(points);
-                            polylineOptions.width(40);
+                            polylineOptions.width(15);
+                            if(counter==0){
                             polylineOptions.color(ContextCompat.getColor(MapsActivity.this, R.color.lightRed));
+                            }else if(counter==1){
+                                polylineOptions.color(ContextCompat.getColor(MapsActivity.this, R.color.intenseLightGreen));
+                            }else {
+                                polylineOptions.color(ContextCompat.getColor(MapsActivity.this, R.color.green));
+
+                            }
+                            counter++;
                             polylineOptions.geodesic(true);
+                            polylineOptions.clickable(true);
+                            Polyline newLine = mMap.addPolyline(polylineOptions);
+                            lines.add(newLine);
                         }
-                        mMap.addPolyline(polylineOptions);
                         Point point = new Point();
                         getWindowManager().getDefaultDisplay().getSize(point);
+
+                        mMap.setOnPolylineClickListener(new GoogleMap.OnPolylineClickListener() {
+                            @Override
+                            public void onPolylineClick(@NonNull Polyline polyline) {
+                                for(Polyline line: lines ){
+                                    line.setWidth(15);
+                                }
+                                try {
+                                    int numerLine = Integer.parseInt(String.valueOf(polyline.getId().charAt(2)));
+                                    getTime(numerLine);
+                                    polyline.setWidth(25);
+
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -275,18 +310,58 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         requestQueue.add(jsonObjectRequest);
     }
 
-    private void getTime(JSONArray routes) throws JSONException {
-        for (int i=0;i<routes.length();i++) {
-            JSONArray legs = routes.getJSONObject(i).getJSONArray("legs");
+    private void getTime(int selectedLine) throws JSONException {
+            JSONArray legs = routes.getJSONObject(selectedLine).getJSONArray("legs");
             for(int j=0;j<legs.length();j++){
-                String time = legs.getJSONObject(j).getJSONObject("duration").getString("text");
-                routeTime = time.substring(0,2);
-                TextView totalRouteTime = findViewById(R.id.totalTimeRoute);
-                totalRouteTime.setText(routeTime + "minutos");
+                String standarDuration = legs.getJSONObject(j).getJSONObject("duration").getString("text");
+                int standarDurationTime = Integer.parseInt( standarDuration.replaceAll("\\D+",""));
+                String trafficDuration = legs.getJSONObject(j).getJSONObject("duration_in_traffic").getString("text");
+                int trafficDurationTime = Integer.parseInt( trafficDuration.replaceAll("\\D+",""));
+                routeTime = calculateTime(standarDurationTime,trafficDurationTime);
+                setNumberColor(routeTime);
             }
-        }
+
 
     }
+
+    private void setNumberColor(int routeTime) {
+        TextView totalRouteTime = findViewById(R.id.totalTimeRoute);
+        if(routeTime>15){
+            totalRouteTime.setTextColor(getResources().getColor(R.color.intenseStrongRed));
+        }else if(routeTime>12){
+            totalRouteTime.setTextColor(getResources().getColor(R.color.intenseRed));
+        }else if(routeTime>8){
+            totalRouteTime.setTextColor(getResources().getColor(R.color.intenseOrange));
+        }else if(routeTime>5){
+            totalRouteTime.setTextColor(getResources().getColor(R.color.intenseStrongGreen));
+        }else totalRouteTime.setTextColor(getResources().getColor(R.color.intenseLightGreen));
+        totalRouteTime.setText(routeTime + "");
+
+    }
+
+
+    private int calculateTime(int standarDurationTime, int trafficDurationTime) {
+        int finalTime;
+        TextView trafficAlert = findViewById(R.id.trafficText);
+        TextView trafficImage = findViewById(R.id.trafficImage);
+
+        if (trafficDurationTime > standarDurationTime) {
+            int trafficTime = trafficDurationTime-standarDurationTime;
+            finalTime = (int) (trafficTime * 0.3 + standarDurationTime * 0.6);
+
+            trafficAlert.setVisibility(View.VISIBLE);
+            trafficImage.setVisibility(View.VISIBLE);
+
+        }else{
+            trafficAlert.setVisibility(View.INVISIBLE);
+            trafficImage.setVisibility(View.INVISIBLE);
+
+
+            finalTime =(int) (standarDurationTime * 0.6);
+        }
+        return finalTime;
+    }
+
 
     private List<LatLng> decodePoly(String encoded){
 
