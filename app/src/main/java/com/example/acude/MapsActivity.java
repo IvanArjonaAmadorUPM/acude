@@ -2,14 +2,19 @@ package com.example.acude;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -43,6 +48,8 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
@@ -84,6 +91,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private int routeTime;
     private ArrayList<Polyline> lines = new ArrayList<>();
     private JSONArray routes;
+    private boolean isHomeEstablished = false;
+    private LatLng homeCoords;
     public static final int MIN_TIME = 1000; //1 SECOND
     public static final int MIN_DISTANCE = 5; //5 METERS
 
@@ -132,6 +141,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         });
+        Button destinyButton = findViewById(R.id.destinyButton);
+        destinyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(isHomeEstablished){
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(homeCoords, 14));
+                    setRoute(actualPosition, homeCoords, mMap);
+                }else{
+                    selectNewDestinyHome();
+
+                }
+            }
+        });
 
         if (!Places.isInitialized()) {
             Places.initialize(getApplicationContext(), "AIzaSyDQzqtfnABh1HPxjOM0T_LbB9LJzztH7J0");
@@ -156,6 +178,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mMap.addMarker(new MarkerOptions().position(destinationCoords).title(destinationAddress));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(destinationCoords, 14));
                 setRoute(actualPosition, destinationCoords, mMap);
+
             }
             @Override
             public void onError(@NonNull Status status) {
@@ -193,6 +216,53 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
     }
+
+    private void selectNewDestinyHome() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        View view = this.getLayoutInflater().inflate(R.layout.dialog_new_home, null);
+        builder.setView(view);
+
+        if (!Places.isInitialized()) {
+            Places.initialize(getApplicationContext(), "AIzaSyDQzqtfnABh1HPxjOM0T_LbB9LJzztH7J0");
+        }
+        AutocompleteSupportFragment homeAutocompleteFragment = (AutocompleteSupportFragment)
+                getSupportFragmentManager().findFragmentById(R.id.homeSearcher);
+
+        homeAutocompleteFragment.setLocationBias(RectangularBounds.newInstance(
+                new LatLng(40.217127,-3.131993),
+                new LatLng(40.657572,-4.120929)));
+        homeAutocompleteFragment.setCountries("ES");
+
+        homeAutocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.NAME,Place.Field.LAT_LNG));
+        homeAutocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(@NonNull Place place) {
+                String homeAddress = place.getName();
+                homeCoords = place.getLatLng();
+                mMap.addMarker(new MarkerOptions()
+                        .position(homeCoords).title(homeAddress)
+                        .icon(bitmapDescriptorFromVector(getApplicationContext(), R.drawable.ic_baseline_home_24))
+                );
+                isHomeEstablished=true;
+            }
+            @Override
+            public void onError(@NonNull Status status) {
+                Log.i(TAG, "An error occurred: " + status);
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+    private BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId) {
+        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
+        vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
+        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
+
     public void setMapStyle(GoogleMap mMap) {
         boolean success = mMap.setMapStyle(new MapStyleOptions(getResources()
                 .getString(R.string.map_style_json)));

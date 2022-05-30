@@ -3,6 +3,7 @@ package com.example.acude;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDialogFragment;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -35,6 +36,7 @@ public class AuthActivity extends AppCompatActivity {
             public void onClick(View view) {
                 EditText email = (EditText) findViewById(R.id.emailEditId);
                 EditText password = (EditText) findViewById(R.id.passwordEditid);
+
                 boolean isDataValid = !email.getText().toString().equals("") && !password.getText().toString().equals("");
                 if(!isDataValid){
                     AlertDialog.Builder builder = new AlertDialog.Builder(AuthActivity.this);

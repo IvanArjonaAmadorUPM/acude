@@ -95,7 +95,7 @@
                 android:layout_weight="1" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/button2"
+                android:id="@+id/destinyButton"
                 style="@style/Widget.MaterialComponents.ExtendedFloatingActionButton"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
@@ -103,6 +103,7 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="30dp"
                 android:layout_marginRight="20dp"
+                app:icon="@drawable/ic_baseline_home_24"
                 app:cornerRadius="28dp"
                 app:iconGravity="textStart"
                 app:iconPadding="0dp"

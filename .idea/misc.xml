@@ -9,6 +9,8 @@
         <entry key="app/src/main/res/drawable/custom_email_icon.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/custom_input.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/custom_lock_icon.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_baseline_home_24.xml" value="0.1695" />
+        <entry key="app/src/main/res/drawable/ic_car.xml" value="0.1695" />
         <entry key="app/src/main/res/drawable/ic_email.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_email_focus.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.1695" />
@@ -21,6 +23,7 @@
         <entry key="app/src/main/res/layout/activity_auth.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_maps.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_splash.xml" value="0.11" />
+        <entry key="app/src/main/res/layout/dialog_new_home.xml" value="0.48519736842105265" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.1" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_acude.xml" value="0.1" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.1" />
