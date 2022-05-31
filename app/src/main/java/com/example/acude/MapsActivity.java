@@ -109,7 +109,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private DatabaseReference databaseReference;
     private FirebaseAuth mAuth;
     private User currentUser;
-
+    private int numberOfRoutes;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -326,7 +326,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         routes = response.getJSONArray("routes");
                         ArrayList<LatLng> points;
                         PolylineOptions polylineOptions = null;
-
+                        numberOfRoutes=routes.length();
+                        System.out.println("---------- - - - - - - - - " + numberOfRoutes);
                         getTime(0);
                         int counter=0;
                         for (int i=0;i<routes.length();i++){
@@ -348,13 +349,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             polylineOptions.addAll(points);
                             polylineOptions.width(15);
                             if(counter==0){
-                            polylineOptions.color(ContextCompat.getColor(MapsActivity.this, R.color.lightRed));
+                            polylineOptions.color(ContextCompat.getColor(MapsActivity.this, R.color.intenseLightGreen));
                             }else if(counter==1){
-                                polylineOptions.color(ContextCompat.getColor(MapsActivity.this, R.color.intenseLightGreen));
-                            }else {
                                 polylineOptions.color(ContextCompat.getColor(MapsActivity.this, R.color.green));
+                            }else if(counter==2){
+                                polylineOptions.color(ContextCompat.getColor(MapsActivity.this, R.color.lightRed));
+                            }else polylineOptions.color(ContextCompat.getColor(MapsActivity.this, R.color.red));
 
-                            }
                             counter++;
                             polylineOptions.geodesic(true);
                             polylineOptions.clickable(true);
