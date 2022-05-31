@@ -1,6 +1,5 @@
 package com.example.acude;
 
-import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
@@ -10,13 +9,10 @@ import androidx.fragment.app.FragmentActivity;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -27,10 +23,7 @@ import androidx.appcompat.widget.SearchView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
@@ -43,15 +36,11 @@ import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMapOptions;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.acude.databinding.ActivityMapsBinding;
@@ -62,25 +51,19 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.model.RectangularBounds;
-import com.google.android.libraries.places.api.model.TypeFilter;
-import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.*;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -88,14 +71,9 @@ import java.util.List;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    private SearchView searchView;
 
     private static final String TAG = MapsActivity.class.getSimpleName();
 
-    private ActivityMapsBinding binding;
-
-    private LocationListener locationListener;
-    private LocationManager locationManager;
     private LatLng actualPosition;
     private LatLng destinationCoords;
     private int routeTime;
@@ -105,39 +83,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LatLng homeCoords;
     public static final int MIN_TIME = 1000; //1 SECOND
     public static final int MIN_DISTANCE = 5; //5 METERS
-    private FirebaseDatabase firebaseDatabase;
-    private DatabaseReference databaseReference;
-    private FirebaseAuth mAuth;
     private User currentUser;
     private int numberOfRoutes;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        binding = ActivityMapsBinding.inflate(getLayoutInflater());
+        com.example.acude.databinding.ActivityMapsBinding binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        /*get permissions*/
+
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PackageManager.PERMISSION_GRANTED);
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PackageManager.PERMISSION_GRANTED);
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+        assert mapFragment != null;
         mapFragment.getMapAsync(this);
     }
 
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
         setMapStyle(mMap);
 
@@ -167,7 +132,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     setRoute(actualPosition, homeCoords, mMap);
                 }else{
                     selectNewDestinyHome();
-
                 }
             }
         });
@@ -178,9 +142,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
                 getSupportFragmentManager().findFragmentById(R.id.autocomplete_search_fragment);
 
-        //assert autocompleteFragment != null;
-        //autocompleteFragment.setTypeFilter(TypeFilter.ADDRESS);
-
+        assert autocompleteFragment != null;
         autocompleteFragment.setLocationBias(RectangularBounds.newInstance(
                 new LatLng(40.217127,-3.131993),
                 new LatLng(40.657572,-4.120929)));
@@ -192,6 +154,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onPlaceSelected(@NonNull Place place) {
                 String destinationAddress = place.getName();
                 destinationCoords = place.getLatLng();
+                assert destinationCoords != null;
                 mMap.addMarker(new MarkerOptions().position(destinationCoords).title(destinationAddress));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(destinationCoords, 14));
                 setRoute(actualPosition, destinationCoords, mMap);
@@ -202,7 +165,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.i(TAG, "An error occurred: " + status);
             }
         });
-        locationListener = new LocationListener() {
+        LocationListener locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(@NonNull Location location) {
                 actualPosition = new LatLng(location.getLatitude(), location.getLongitude());
@@ -225,7 +188,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 LocationListener.super.onProviderDisabled(provider);
             }
         };
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         try {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME, MIN_DISTANCE, locationListener);
         } catch (SecurityException e) {
@@ -246,6 +209,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         AutocompleteSupportFragment homeAutocompleteFragment = (AutocompleteSupportFragment)
                 getSupportFragmentManager().findFragmentById(R.id.homeSearcher);
 
+        assert homeAutocompleteFragment != null;
         homeAutocompleteFragment.setLocationBias(RectangularBounds.newInstance(
                 new LatLng(40.217127,-3.131993),
                 new LatLng(40.657572,-4.120929)));
@@ -257,10 +221,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onPlaceSelected(@NonNull Place place) {
                 String homeAddress = place.getName();
                 homeCoords = place.getLatLng();
-                mMap.addMarker(new MarkerOptions()
-                        .position(homeCoords).title(homeAddress)
-                        .icon(bitmapDescriptorFromVector(getApplicationContext(), R.drawable.ic_baseline_home_24))
-                );
+                if (homeCoords != null) {
+                    mMap.addMarker(new MarkerOptions()
+                            .position(homeCoords).title(homeAddress)
+                            .icon(bitmapDescriptorFromVector(getApplicationContext(), R.drawable.ic_baseline_home_24))
+                    );
+                }
                 isHomeEstablished=true;
             }
             @Override
@@ -320,14 +286,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onResponse(JSONObject response) {
                 try {
                     String status = response.getString("status");
-
                     if (status.equals("OK")) {
-
                         routes = response.getJSONArray("routes");
                         ArrayList<LatLng> points;
-                        PolylineOptions polylineOptions = null;
+                        PolylineOptions polylineOptions;
                         numberOfRoutes=routes.length();
-                        System.out.println("---------- - - - - - - - - " + numberOfRoutes);
                         getTime(0);
                         int counter=0;
                         for (int i=0;i<routes.length();i++){
@@ -473,10 +436,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void getUserData() {
         FirebaseApp.initializeApp(this);
-        mAuth = FirebaseAuth.getInstance();
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseUser user = mAuth.getCurrentUser();
-        firebaseDatabase = FirebaseDatabase.getInstance("https://acude-9a40a-default-rtdb.europe-west1.firebasedatabase.app/");
-        databaseReference = firebaseDatabase.getReference();
+        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance("https://acude-9a40a-default-rtdb.europe-west1.firebasedatabase.app/");
+        DatabaseReference databaseReference = firebaseDatabase.getReference();
+        assert user != null;
         String uid = user.getUid();
         DatabaseReference userRef = databaseReference.child("users");
         userRef.child(uid).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
@@ -492,12 +456,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
     }
-
-
     private List<LatLng> decodePoly(String encoded){
-
-        List<LatLng> poly = new ArrayList<LatLng>();
-
+        List<LatLng> poly = new ArrayList<>();
         int index = 0, len = encoded.length();
         int lat = 0, lng = 0;
 

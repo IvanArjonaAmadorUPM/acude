@@ -11,8 +11,6 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.FirebaseApp;
@@ -21,12 +19,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.android.material.snackbar.Snackbar;
 
 public class RegisterActivity extends AppCompatActivity {
     private int idRoleSelected = 0; //1 police, 2 medic, 3 firefighter
-    private FirebaseDatabase firebaseDatabase;
-    private DatabaseReference databaseReference;
     private FirebaseAuth mAuth;
     private User user;
     @Override
@@ -161,8 +156,8 @@ public class RegisterActivity extends AppCompatActivity {
     }
     private void updateUI(FirebaseUser currentUser) {
         if (user != null) {
-            firebaseDatabase = FirebaseDatabase.getInstance("https://acude-9a40a-default-rtdb.europe-west1.firebasedatabase.app/");
-            databaseReference = firebaseDatabase.getReference();
+            FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance("https://acude-9a40a-default-rtdb.europe-west1.firebasedatabase.app/");
+            DatabaseReference databaseReference = firebaseDatabase.getReference();
             String uid = currentUser.getUid();
             DatabaseReference userRef = databaseReference.child("users");
             userRef.child(uid).setValue(user);
