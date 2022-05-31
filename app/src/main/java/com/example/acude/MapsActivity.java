@@ -371,8 +371,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     line.setWidth(15);
                                 }
                                 try {
-                                    int numerLine = Integer.parseInt(String.valueOf(polyline.getId().charAt(2)));
-                                    getTime(numerLine);
+                                    int numberLine = Integer.parseInt(String.valueOf(polyline.getId().charAt(2)));
+                                    getTime(numberLine);
                                     polyline.setWidth(25);
 
                                 } catch (JSONException e) {
@@ -429,14 +429,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private int calculateTime(int standarDurationTime, int trafficDurationTime) {
         int finalTime;
+        double standarTimeReduction;
+        double trafficTimeReduction;
+
         TextView trafficAlert = findViewById(R.id.trafficText);
         TextView trafficImage = findViewById(R.id.trafficImage);
-
+        switch(currentUser.getRole()){
+            case 1:
+                standarTimeReduction = 0.5;
+                trafficTimeReduction = 0.2;
+                break;
+            case 2:
+                standarTimeReduction = 0.6;
+                trafficTimeReduction = 0.4;
+                break;
+            case 3:
+                standarTimeReduction = 0.7;
+                trafficTimeReduction = 0.7;
+                break;
+            default:
+                standarTimeReduction = 0.9;
+                trafficTimeReduction = 0.9;
+                break;
+        }
 
         if (trafficDurationTime > standarDurationTime) {
             //int userType = getUserType();
             int trafficTime = trafficDurationTime-standarDurationTime;
-            finalTime = (int) (trafficTime * 0.3 + standarDurationTime * 0.6);
+            finalTime = (int) (trafficTime * trafficTimeReduction + standarDurationTime * standarTimeReduction);
 
             trafficAlert.setVisibility(View.VISIBLE);
             trafficImage.setVisibility(View.VISIBLE);
@@ -445,7 +465,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             trafficAlert.setVisibility(View.INVISIBLE);
             trafficImage.setVisibility(View.INVISIBLE);
 
-            finalTime =(int) (standarDurationTime * 0.6);
+            finalTime =(int) (standarDurationTime * standarTimeReduction);
         }
         return finalTime;
     }
