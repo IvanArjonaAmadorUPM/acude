@@ -42,6 +42,7 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.acude.databinding.ActivityMapsBinding;
 import com.google.android.gms.maps.model.Polyline;
@@ -84,7 +85,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public static final int MIN_TIME = 1000; //1 SECOND
     public static final int MIN_DISTANCE = 5; //5 METERS
     private User currentUser;
-    private int numberOfRoutes;
+    private boolean firstTime = true;
+    private Marker actualPositionMarker;
+    private Marker destinyPositionMarker;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,8 +122,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }else {
                     trafficButton.setBackgroundColor(getResources().getColor(R.color.red));
                 }
-
-
             }
         });
         Button destinyButton = findViewById(R.id.destinyButton);
@@ -128,6 +129,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View view) {
                 if(isHomeEstablished){
+                    if(destinyPositionMarker!=null){
+                        destinyPositionMarker.remove();
+                    }
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(homeCoords, 14));
                     setRoute(actualPosition, homeCoords, mMap);
                 }else{
@@ -152,10 +156,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(@NonNull Place place) {
+                if(destinyPositionMarker!=null){
+                    destinyPositionMarker.remove();
+                }
                 String destinationAddress = place.getName();
                 destinationCoords = place.getLatLng();
                 assert destinationCoords != null;
-                mMap.addMarker(new MarkerOptions().position(destinationCoords).title(destinationAddress));
+                destinyPositionMarker = mMap.addMarker(new MarkerOptions().position(destinationCoords)
+                        .title(destinationAddress)
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_destiny_mark)));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(destinationCoords, 14));
                 setRoute(actualPosition, destinationCoords, mMap);
 
@@ -168,9 +177,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LocationListener locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(@NonNull Location location) {
+                if(actualPositionMarker!=null){
+                    actualPositionMarker.remove();
+                }
                 actualPosition = new LatLng(location.getLatitude(), location.getLongitude());
-                mMap.addMarker(new MarkerOptions().position(actualPosition).title("my position"));
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(actualPosition, 12));
+                actualPositionMarker = mMap.addMarker(new MarkerOptions()
+                        .position(actualPosition).title("Posición actual")
+                );
+                if(firstTime) {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(actualPosition, 14));
+                    firstTime=false;
+                }
             }
 
             @Override
@@ -228,6 +245,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     );
                 }
                 isHomeEstablished=true;
+                AlertDialog.Builder builder = new AlertDialog.Builder(MapsActivity.this);
+                builder.setMessage("Se ha guardado tu destino. Pulsa de nuevo para dirigirte rápidamente a la ubicación");
+                builder.setTitle("Destino registrado");
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
+
             }
             @Override
             public void onError(@NonNull Status status) {
@@ -290,7 +313,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         routes = response.getJSONArray("routes");
                         ArrayList<LatLng> points;
                         PolylineOptions polylineOptions;
-                        numberOfRoutes=routes.length();
                         getTime(0);
                         int counter=0;
                         for (int i=0;i<routes.length();i++){
@@ -314,7 +336,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             if(counter==0){
                             polylineOptions.color(ContextCompat.getColor(MapsActivity.this, R.color.intenseLightGreen));
                             }else if(counter==1){
-                                polylineOptions.color(ContextCompat.getColor(MapsActivity.this, R.color.green));
+                                polylineOptions.color(ContextCompat.getColor(MapsActivity.this, R.color.ligthOrange));
                             }else if(counter==2){
                                 polylineOptions.color(ContextCompat.getColor(MapsActivity.this, R.color.lightRed));
                             }else polylineOptions.color(ContextCompat.getColor(MapsActivity.this, R.color.red));
@@ -336,8 +358,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 }
                                 try {
                                     int numberLine = Integer.parseInt(String.valueOf(polyline.getId().charAt(2)));
-                                    getTime(numberLine);
                                     polyline.setWidth(25);
+                                    getTime(numberLine);
 
                                 } catch (JSONException e) {
                                     e.printStackTrace();
@@ -362,14 +384,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void getTime(int selectedLine) throws JSONException {
-            JSONArray legs = routes.getJSONObject(selectedLine).getJSONArray("legs");
-            for(int j=0;j<legs.length();j++){
-                String standarDuration = legs.getJSONObject(j).getJSONObject("duration").getString("text");
-                int standarDurationTime = Integer.parseInt( standarDuration.replaceAll("\\D+",""));
-                String trafficDuration = legs.getJSONObject(j).getJSONObject("duration_in_traffic").getString("text");
-                int trafficDurationTime = Integer.parseInt( trafficDuration.replaceAll("\\D+",""));
-                routeTime = calculateTime(standarDurationTime,trafficDurationTime);
-                setNumberColor(routeTime);
+        JSONArray legs = routes.getJSONObject(selectedLine).getJSONArray("legs");
+        for(int j=0;j<legs.length();j++){
+            String standarDuration = legs.getJSONObject(j).getJSONObject("duration").getString("text");
+            int standarDurationTime = Integer.parseInt( standarDuration.replaceAll("\\D+",""));
+            String trafficDuration = legs.getJSONObject(j).getJSONObject("duration_in_traffic").getString("text");
+            int trafficDurationTime = Integer.parseInt( trafficDuration.replaceAll("\\D+",""));
+            routeTime = calculateTime(standarDurationTime,trafficDurationTime);
+            setNumberColor(routeTime);
             }
 
 
@@ -386,7 +408,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }else if(routeTime>5){
             totalRouteTime.setTextColor(getResources().getColor(R.color.intenseStrongGreen));
         }else totalRouteTime.setTextColor(getResources().getColor(R.color.intenseLightGreen));
-        totalRouteTime.setText(routeTime + "");
+        totalRouteTime.setText(routeTime + " MIN");
 
     }
 

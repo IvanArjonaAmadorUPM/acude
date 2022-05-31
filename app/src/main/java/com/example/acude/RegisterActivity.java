@@ -20,6 +20,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class RegisterActivity extends AppCompatActivity {
     private int idRoleSelected = 0; //1 police, 2 medic, 3 firefighter
     private FirebaseAuth mAuth;
@@ -110,6 +113,17 @@ public class RegisterActivity extends AppCompatActivity {
         finish();
     }
     public boolean validateData(String email, String password, String repeatedPassword){
+        String regex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(email);
+        if(!matcher.matches()){
+            AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
+            builder.setMessage("El email introducido es inválido");
+            builder.setTitle("Email inválido");
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+            return false;
+        }
         if(idRoleSelected == 0){
             AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
             builder.setMessage("Elige tu rol para poder registrarte en la aplicación");

@@ -66,14 +66,15 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:layout_weight="1"
-                    android:textSize="34sp" />
+                    android:textSize="28sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/trafficImage"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:drawableStart="@drawable/ic_traffic_alert"
+                    android:drawableBottom="@drawable/ic_traffic_alert"
                     android:paddingStart="4dp"
                     android:textAlignment="center" />
 
@@ -83,6 +84,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="¡tráfico!"
+                    android:textAlignment="center"
                     android:textColor="#8A0000"
                     android:textSize="11sp"
                     android:visibility="invisible" />
