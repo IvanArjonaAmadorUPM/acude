@@ -57,6 +57,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.acude.databinding.ActivityMapsBinding;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.model.RectangularBounds;
@@ -64,6 +66,14 @@ import com.google.android.libraries.places.api.model.TypeFilter;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -95,6 +105,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LatLng homeCoords;
     public static final int MIN_TIME = 1000; //1 SECOND
     public static final int MIN_DISTANCE = 5; //5 METERS
+    private FirebaseDatabase firebaseDatabase;
+    private DatabaseReference databaseReference;
+    private FirebaseAuth mAuth;
+    private User currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,6 +140,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         setMapStyle(mMap);
+
+        getUserData();
+
         Button trafficButton = findViewById(R.id.trafficButton);
         trafficButton.setBackgroundColor(getResources().getColor(R.color.red));
         trafficButton.setOnClickListener(new View.OnClickListener() {
@@ -415,7 +432,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         TextView trafficAlert = findViewById(R.id.trafficText);
         TextView trafficImage = findViewById(R.id.trafficImage);
 
+
         if (trafficDurationTime > standarDurationTime) {
+            //int userType = getUserType();
             int trafficTime = trafficDurationTime-standarDurationTime;
             finalTime = (int) (trafficTime * 0.3 + standarDurationTime * 0.6);
 
@@ -426,10 +445,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             trafficAlert.setVisibility(View.INVISIBLE);
             trafficImage.setVisibility(View.INVISIBLE);
 
-
             finalTime =(int) (standarDurationTime * 0.6);
         }
         return finalTime;
+    }
+
+    private void getUserData() {
+        FirebaseApp.initializeApp(this);
+        mAuth = FirebaseAuth.getInstance();
+        FirebaseUser user = mAuth.getCurrentUser();
+        firebaseDatabase = FirebaseDatabase.getInstance("https://acude-9a40a-default-rtdb.europe-west1.firebasedatabase.app/");
+        databaseReference = firebaseDatabase.getReference();
+        String uid = user.getUid();
+        DatabaseReference userRef = databaseReference.child("users");
+        userRef.child(uid).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+
+                if (!task.isSuccessful()) {
+                    Log.e("firebase", "Error getting data", task.getException());
+                }
+                else {
+                    currentUser = task.getResult().getValue(User.class);
+                }
+            }
+        });
     }
 
 

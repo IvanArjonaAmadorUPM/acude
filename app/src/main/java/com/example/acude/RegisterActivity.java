@@ -99,9 +99,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     public void onPoliceButtonClicked(View view) { idRoleSelected=1; }
     public void onMedicButtonClicked(View view) { idRoleSelected=2; }
-    public void onFirefighterButtonClicked(View view) {
-        idRoleSelected=3;
-    }
+    public void onFirefighterButtonClicked(View view) { idRoleSelected=3; }
 
     private void showMap() {
         Intent intent = new Intent(this, MapsActivity.class);
