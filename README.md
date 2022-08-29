@@ -5,7 +5,7 @@ El proyecto se basará en una aplicación para dispositivos móviles, dirigida a
 
 El objetivo de la aplicación es el de reducir los tiempos de respuesta de los vehículos de emergencia y mejorar su seguimiento, así como permitir a los profesionales acceder a funcionalidades que harían más cómodos los movimientos en el vehículo.
 
-  ATENCION
+    - ATENCION -
   
 La aplicación actual posee una API KEY no valida, por lo que la aplicación no funcionará correctamente.
 Si desea ver un video demostrativo del uso de la aplicación, puede hacer click en el siguiente enlace
